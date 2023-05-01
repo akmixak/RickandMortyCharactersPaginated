@@ -1,9 +1,6 @@
-import React, { useState } from "react";
-import { render } from "react-dom";
+import React from "react";
 
 import { useQuery, gql, NetworkStatus } from "@apollo/client";
-
-let cache;
 
 const GET_CHARACTERS = gql`
   query getCharctersList($page: Int) {
@@ -29,12 +26,8 @@ function CharactersList() {
   );
   const currStatus = React.useRef(null);
   const ref = React.useRef(null);
-  //console.log(networkStatus);
   const page = React.useRef(1);
-  const [fetchMoreLoading, setFetchMoreLoading] = React.useState(false);
-  // console.log(loading, networkStatus);
   const handler = React.useCallback(() => {
-    // console.log(loading, "loading inside handler");
     if (!loading && currStatus.current !== "refetch") {
       currStatus.current = "refetch";
       fetchMore({
@@ -56,19 +49,11 @@ function CharactersList() {
           };
         },
       }).then(() => (currStatus.current = null));
-      //currStatus.current = "null";
       page.current = page.current + 1;
     }
-  }, [data]);
+  }, [fetchMore, loading]);
 
   const onScrollHandler = React.useCallback(() => {
-    console.log("lindwfbilr");
-    console.log(
-      Math.floor(ref.current.scrollHeight),
-      ref.current.scrollTop,
-      ref.current.clientHeight
-    );
-
     if (
       Math.floor(
         ref.current.scrollHeight -
@@ -78,28 +63,18 @@ function CharactersList() {
     ) {
       handler();
     }
-  }, [data, handler, fetchMoreLoading]);
-  // React.useEffect(() => {
-  //   console.log(loading, "loading inside effect");
-  //   ref.current.addEventListener("scroll", onScrollHandler);
-  //   //window.addEventListener("scroll", onScrollHandler);
-  //   return () => {
-  //     .removeEventListener("scroll", onScrollHandler);
-  //   };
-  // }, [onScrollHandler]);
+  }, [handler]);
 
   if (loading && networkStatus !== NetworkStatus.fetchMore) return "Loading...";
   if (error) return <div>{error.message}</div>;
+
   return (
     <div
       ref={ref}
       onScroll={onScrollHandler}
       style={{ height: "1000px", overflow: "auto" }}
     >
-      <ul
-
-      // style={{ height: "1000px", overflow: "auto" }}
-      >
+      <ul>
         {data.characters.results.map((character) => {
           return (
             <li
@@ -109,7 +84,7 @@ function CharactersList() {
               <div>{character.id}</div>
               <div>{character.name}</div>
               <div>
-                <img src={character.image} />
+                <img src={character.image} alt="Not loaded" />
               </div>
             </li>
           );
@@ -121,15 +96,9 @@ function CharactersList() {
       <div style={{ height: "150px", width: "100%" }}></div>
     </div>
   );
-  return null;
 }
 
-// For Fun Only
-
-function ForFunOnly() {}
-
 function App({ client }) {
-  cache = client.cache;
   return (
     <div>
       <CharactersList />
