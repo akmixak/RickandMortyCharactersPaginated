@@ -28,6 +28,7 @@ function CharactersList() {
     }
   );
   const currStatus = React.useRef(null);
+  const ref = React.useRef(null);
   //console.log(networkStatus);
   const page = React.useRef(1);
   const [fetchMoreLoading, setFetchMoreLoading] = React.useState(false);
@@ -61,26 +62,44 @@ function CharactersList() {
   }, [data]);
 
   const onScrollHandler = React.useCallback(() => {
-    let cords = document.body.getBoundingClientRect();
-    console.log(cords.bottom - window.innerHeight);
-    if (Math.floor(cords.bottom - window.innerHeight) <= 0) {
+    console.log("lindwfbilr");
+    console.log(
+      Math.floor(ref.current.scrollHeight),
+      ref.current.scrollTop,
+      ref.current.clientHeight
+    );
+
+    if (
+      Math.floor(
+        ref.current.scrollHeight -
+          ref.current.scrollTop -
+          ref.current.clientHeight
+      ) <= 0
+    ) {
       handler();
     }
   }, [data, handler, fetchMoreLoading]);
-  React.useEffect(() => {
-    console.log(loading, "loading inside effect");
-    window.addEventListener("scroll", onScrollHandler);
-    //window.addEventListener("scroll", onScrollHandler);
-    return () => {
-      window.removeEventListener("scroll", onScrollHandler);
-    };
-  }, [onScrollHandler]);
+  // React.useEffect(() => {
+  //   console.log(loading, "loading inside effect");
+  //   ref.current.addEventListener("scroll", onScrollHandler);
+  //   //window.addEventListener("scroll", onScrollHandler);
+  //   return () => {
+  //     .removeEventListener("scroll", onScrollHandler);
+  //   };
+  // }, [onScrollHandler]);
 
   if (loading && networkStatus !== NetworkStatus.fetchMore) return "Loading...";
   if (error) return <div>{error.message}</div>;
   return (
-    <div>
-      <ul>
+    <div
+      ref={ref}
+      onScroll={onScrollHandler}
+      style={{ height: "1000px", overflow: "auto" }}
+    >
+      <ul
+
+      // style={{ height: "1000px", overflow: "auto" }}
+      >
         {data.characters.results.map((character) => {
           return (
             <li
